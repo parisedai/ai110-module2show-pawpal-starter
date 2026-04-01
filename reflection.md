@@ -4,13 +4,17 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+- I designed four main classes: `Owner`, `Pet`, `Task`, and `Scheduler`.
+- `Owner` stores owner identity and a list of pets.
+- `Pet` stores pet profile data and that pet's tasks.
+- `Task` stores one care activity (description, time, frequency, due date, completion state).
+- `Scheduler` is the coordination layer that reads tasks from owner/pet objects and applies sorting, filtering, recurrence handling, and conflict detection.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+- Yes. I added `due_date` and `task_id` fields to `Task` during implementation.
+- `due_date` was needed for recurrence and for filtering today's tasks.
+- `task_id` supports safer task removal and future editing without relying on non-unique descriptions.
 
 ---
 
@@ -18,13 +22,14 @@
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+- The scheduler currently considers task time (`HH:MM`), due date, frequency (`once`, `daily`, `weekly`), pet name, and completion status.
+- I prioritized these because they are the minimum needed to build a useful daily plan and validate key scheduling behaviors before adding advanced optimization.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+- The scheduler flags conflicts only when two tasks have the exact same date and time.
+- It does not model overlap by duration yet.
+- This tradeoff keeps the logic simple, readable, and testable for a module project while still providing immediate value to users.
 
 ---
 
@@ -32,13 +37,13 @@
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+- I used AI for class brainstorming, UML drafting, method skeleton generation, and test-case generation.
+- The most useful prompts were specific implementation questions such as: "How should Scheduler retrieve tasks from Owner pets?" and "How should daily recurrence create the next due date safely?"
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+- I rejected an AI suggestion to overcomplicate conflict logic with duration overlap before duration was a core field in my data model.
+- I kept exact-time conflict detection and verified correctness with focused pytest cases for duplicate and non-duplicate times.
 
 ---
 
@@ -46,13 +51,13 @@
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+- I tested task completion status changes, pet task-count growth after add, sort order correctness, daily recurrence behavior, and conflict detection.
+- These tests are important because they validate the core contracts between classes and catch regressions in the scheduler's key algorithms.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+- Confidence: 4/5.
+- Next edge cases I would test are invalid time formats, empty owner/pet states in UI flows, weekly recurrence across month boundaries, and multi-conflict scenarios with three or more tasks at the same slot.
 
 ---
 
@@ -60,12 +65,12 @@
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+- I am most satisfied with the clear class boundaries and how quickly that design translated into both CLI and Streamlit behavior.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+- I would add task duration and priority weighting, then upgrade scheduler planning from simple sorting to a score-based planning method.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+- My key takeaway is that AI accelerates implementation best when I first define architecture and constraints clearly, then use tests as the final authority for correctness.

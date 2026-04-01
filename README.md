@@ -1,30 +1,87 @@
 # PawPal+ (Module 2 Project)
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+PawPal+ is a Streamlit app that helps a pet owner manage daily pet care with a simple scheduling engine.
 
-## Scenario
+## Features
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+- Owner and pet management in a persistent Streamlit session
+- Task scheduling by time (`HH:MM`), frequency, and due date
+- Daily schedule view sorted chronologically
+- Conflict warnings when two tasks share the same date/time slot
+- Recurring task automation for `daily` and `weekly` tasks
+- CLI demo script for backend verification
+- Automated pytest suite for key scheduler behaviors
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
+## System Design (Mermaid UML)
 
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
+```mermaid
+classDiagram
+		class Owner {
+			+name: str
+			+email: str
+			+pets: list[Pet]
+			+add_pet(pet)
+			+remove_pet(pet_name)
+			+get_all_tasks()
+		}
 
-## What you will build
+		class Pet {
+			+name: str
+			+species: str
+			+age: int
+			+tasks: list[Task]
+			+add_task(task)
+			+remove_task(task_id)
+		}
 
-Your final app should:
+		class Task {
+			+description: str
+			+time: str
+			+pet_name: str
+			+frequency: str
+			+due_date: date
+			+completed: bool
+			+task_id: str
+			+mark_complete()
+			+next_occurrence()
+		}
 
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+		class Scheduler {
+			+owner: Owner
+			+get_todays_tasks()
+			+sort_by_time(tasks)
+			+filter_by_pet(pet_name)
+			+filter_by_status(completed)
+			+handle_recurrence(task)
+			+detect_conflicts()
+			+conflict_warnings()
+		}
 
-## Getting started
+		Owner "1" --> "many" Pet : has
+		Pet "1" --> "many" Task : owns
+		Scheduler --> Owner : reads from
+```
 
-### Setup
+## Smarter Scheduling
+
+The scheduler includes four algorithmic behaviors:
+
+- Sorting: uses `sorted(..., key=lambda task: task.time)` for chronological order
+- Filtering: returns subsets by pet name or completion status
+- Recurrence: when a `daily` or `weekly` task is completed, a new task is automatically created with the next due date
+- Conflict detection: flags exact slot collisions for same `date + time` without crashing
+
+Tradeoff: conflict detection checks only exact time matches, not overlapping durations.
+
+## Project Structure
+
+- `pawpal_system.py`: backend classes and scheduling logic
+- `app.py`: Streamlit UI integrated with backend
+- `main.py`: terminal demo of scheduling behavior
+- `tests/test_pawpal.py`: automated tests
+- `reflection.md`: design and AI-collaboration reflection
+
+## Run Locally
 
 ```bash
 python -m venv .venv
@@ -32,12 +89,38 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Suggested workflow
+Run CLI demo:
 
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
+```bash
+python main.py
+```
+
+Run Streamlit app:
+
+```bash
+streamlit run app.py
+```
+
+## Testing PawPal+
+
+Run tests with:
+
+```bash
+python -m pytest -v
+```
+
+The suite validates:
+
+- task completion behavior
+- task addition and list growth
+- chronological sorting correctness
+- recurrence creation for daily tasks
+- conflict detection for duplicate time slots
+
+Confidence level: 4/5 stars.
+
+## Demo
+
+Add your final UI screenshot in this section after running the app:
+
+![PawPal+ App Screenshot](image.png)
